@@ -1,0 +1,40 @@
+[
+    {
+        "description": "A very good and high quality mouse.",
+        "image": "https://eincode.mypinata.cloud/ipfs/QmaQYCrX9Fg2kGijqapTYgpMXV7QPPzMwGrSRfV9TvTsfM/Creature_1.png",
+        "name": "Logitech G502",
+        "attributes": [
+            {
+                "trait_type": "quality",
+                "value": "95"
+            },
+            {
+                "trait_type": "grade",
+                "value": "100"
+            },
+            {
+                "trait_type": "warranty",
+                "value": "24"
+            }
+        ]
+    },
+    {
+        "description": "Mechanical keyboard, good for gaming",
+        "image": "https://eincode.mypinata.cloud/ipfs/QmaQYCrX9Fg2kGijqapTYgpMXV7QPPzMwGrSRfV9TvTsfM/Creature_2.png",
+        "name": "Razer Deathstalker V2",
+        "attributes": [
+            {
+                "trait_type": "quality",
+                "value": "90"
+            },
+            {
+                "trait_type": "grade",
+                "value": "80"
+            },
+            {
+                "trait_type": "warranty",
+                "value": "12"
+            }
+        ]
+    }
+]
