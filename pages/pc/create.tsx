@@ -6,16 +6,16 @@ import { BaseLayout } from '../../components'
 import { Switch } from '@headlessui/react'
 import Link from 'next/link'
 
-const ATTRIBUTES = ["health", "attack", "speed"]
+const ATTRIBUTES = ["quality", "grade", "warranty"]
 
 const PcCreate: NextPage = () => {
-    const [nftURI, setNftURI] = useState("");
+    const [pcURI, setpcURI] = useState("");
     const [hasURI, setHasURI] = useState(false);
     return (
         <BaseLayout>
             <div>
                 <div className="py-4">
-                    {!nftURI &&
+                    {!pcURI &&
                         <div className="flex">
                             <div className="mr-2 font-bold underline">Do you have meta data already?</div>
                             <Switch
@@ -34,11 +34,11 @@ const PcCreate: NextPage = () => {
                         </div>
                     }
                 </div>
-                {(nftURI || hasURI) ?
+                {(pcURI || hasURI) ?
                     <div className="md:grid md:grid-cols-3 md:gap-6">
                         <div className="md:col-span-1">
                             <div className="px-4 sm:px-0">
-                                <h3 className="text-lg font-medium leading-6 text-gray-900">List NFT</h3>
+                                <h3 className="text-lg font-medium leading-6 text-gray-900">List Component</h3>
                                 <p className="mt-1 text-sm text-gray-600">
                                     This information will be displayed publicly so be careful what you share.
                                 </p>
@@ -55,7 +55,7 @@ const PcCreate: NextPage = () => {
                                                 </label>
                                                 <div className="mt-1 flex rounded-md shadow-sm">
                                                     <input
-                                                        onChange={(e) => setNftURI(e.target.value)}
+                                                        onChange={(e) => setpcURI(e.target.value)}
                                                         type="text"
                                                         name="uri"
                                                         id="uri"
@@ -66,13 +66,13 @@ const PcCreate: NextPage = () => {
                                             </div>
                                         </div>
                                     }
-                                    {nftURI &&
+                                    {pcURI &&
                                         <div className='mb-4 p-4'>
                                             <div className="font-bold">Your metadata: </div>
                                             <div>
-                                                <Link href={nftURI}>
+                                                <Link href={pcURI}>
                                                     <a className="underline text-indigo-600">
-                                                        {nftURI}
+                                                        {pcURI}
                                                     </a>
                                                 </Link>
                                             </div>
@@ -110,9 +110,9 @@ const PcCreate: NextPage = () => {
                     <div className="md:grid md:grid-cols-3 md:gap-6">
                         <div className="md:col-span-1">
                             <div className="px-4 sm:px-0">
-                                <h3 className="text-lg font-medium leading-6 text-gray-900">Create NFT Metadata</h3>
+                                <h3 className="text-lg font-medium leading-6 text-gray-900">Create Components Metadata</h3>
                                 <p className="mt-1 text-sm text-gray-600">
-                                    This information will be displayed publicly so be careful what you share.
+                                    The component will be listed publicly.
                                 </p>
                             </div>
                         </div>
@@ -122,7 +122,7 @@ const PcCreate: NextPage = () => {
                                     <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
                                         <div>
                                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                                Name
+                                                Component Name
                                             </label>
                                             <div className="mt-1 flex rounded-md shadow-sm">
                                                 <input
@@ -130,7 +130,7 @@ const PcCreate: NextPage = () => {
                                                     name="name"
                                                     id="name"
                                                     className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
-                                                    placeholder="My Nice NFT"
+                                                    placeholder="Component"
                                                 />
                                             </div>
                                         </div>
@@ -144,19 +144,19 @@ const PcCreate: NextPage = () => {
                                                     name="description"
                                                     rows={3}
                                                     className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                                                    placeholder="Some nft description..."
+                                                    placeholder="Component description..."
                                                     defaultValue={''}
                                                 />
                                             </div>
                                             <p className="mt-2 text-sm text-gray-500">
-                                                Brief description of NFT
+                                                Brief description of Component
                                             </p>
                                         </div>
                                         {/* Has Image? */}
                                         {false ?
                                             <img src="https://eincode.mypinata.cloud/ipfs/QmaQYCrX9Fg2kGijqapTYgpMXV7QPPzMwGrSRfV9TvTsfM/Creature_1.png" alt="" className="h-40" /> :
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Cover photo</label>
+                                                <label className="block text-sm font-medium text-gray-700">Photo</label>
                                                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                                     <div className="space-y-1 text-center">
                                                         <svg
