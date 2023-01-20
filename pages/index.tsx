@@ -5,8 +5,20 @@ import type { NextPage } from 'next'
 import { BaseLayout, PcList } from '@ui'
 import PcParts from "../content/meta.json"
 import { PcMeta } from '@_types/pc'
+import { useWeb3 } from '@providers/web3'
 
 const Home: NextPage = () => {
+  const { ethereum, provider, isLoading, contract } = useWeb3();
+  console.log(contract);
+  const getAccounts = async () => {
+    const account = await provider!.listAccounts();
+    console.log(account[0]);
+  }
+
+  if (provider) {
+    getAccounts();
+  }
+
   return (
     <BaseLayout>
       <div className="relative bg-gray-50 pt-16 pb-20 px-4 sm:px-6 lg:pt-24 lg:pb-28 lg:px-8">
