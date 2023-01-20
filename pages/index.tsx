@@ -2,9 +2,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import type { NextPage } from 'next'
-import { BaseLayout, PcList } from '../components'
+import { BaseLayout, PcList } from '@ui'
 import PcParts from "../content/meta.json"
-import { PcMeta } from '../types/pc'
+import { PcMeta } from '@_types/pc'
 
 const Home: NextPage = () => {
   return (

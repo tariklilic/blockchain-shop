@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 import PcItem from '../item';
-import { PcMeta } from '../../../types/pc';
+import { PcMeta } from '../../../../types/pc';
 
 type PcListProps = {
     PcParts: PcMeta[]
