@@ -8,19 +8,7 @@ import { PcMeta } from '@_types/pc'
 import { useWeb3 } from '@providers/web3'
 
 const Home: NextPage = () => {
-  const { ethereum, provider, isLoading, contract } = useWeb3();
-
-  console.log(contract);
-
-
-  const getAccounts = async () => {
-    const account = await provider!.listAccounts();
-    console.log(account[0]);
-  }
-
-  if (provider) {
-    getAccounts();
-  }
+  const { provider, contract } = useWeb3();
 
   return (
     <BaseLayout>
