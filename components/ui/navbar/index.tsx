@@ -4,7 +4,7 @@
 import { Disclosure } from '@headlessui/react'
 import { MenuIcon, XIcon } from '@heroicons/react/outline'
 import ActiveLink from '../link'
-import { useAccount } from '@hooks/web3'
+import { useAccount, useNetwork } from '@hooks/web3'
 import Walletbar from './Walletbar'
 
 const navigation = [
@@ -18,15 +18,16 @@ function classNames(...classes: string[]) {
 
 export default function Navbar() {
     const { account } = useAccount();
+    const { network } = useNetwork();
     return (
-        <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-400">
             {({ open }) => (
                 <>
                     <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
                         <div className="relative flex items-center justify-between h-16">
                             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                                 {/* Mobile menu button*/}
-                                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
                                         <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -49,10 +50,10 @@ export default function Navbar() {
                                             <ActiveLink
                                                 key={item.name}
                                                 href={item.href}
-                                                activeClass="bg-gray-900 text-white"
+                                                activeClass="bg-gray-600 text-white"
                                             >
                                                 <div
-                                                    className={'text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium'}
+                                                    className={'text-white hover:bg-gray-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium'}
                                                     aria-current={item.current ? 'page' : undefined}
                                                 >
                                                     {item.name}
@@ -63,6 +64,19 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                                <div className="text-gray-300 self-center mr-2">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-600 text-indigo-400">
+                                        <svg className="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
+                                            <circle cx={4} cy={4} r={3} />
+                                        </svg>
+                                        {network.isLoading ?
+                                            "Loading..." :
+                                            account.isInstalled ?
+                                                network.data :
+                                                "Install Web3 Wallet"
+                                        }
+                                    </span>
+                                </div>
                                 <Walletbar
                                     isInstalled={account.isInstalled}
                                     isLoading={account.isLoading}
@@ -81,7 +95,7 @@ export default function Navbar() {
                                     as="a"
                                     href={item.href}
                                     className={classNames(
-                                        item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                        item.current ? 'bg-gray-500 text-white' : 'text-white hover:bg-gray-300 hover:text-white',
                                         'block px-3 py-2 rounded-md text-base font-medium'
                                     )}
                                     aria-current={item.current ? 'page' : undefined}
