@@ -15,15 +15,23 @@ const Web3Provider: FunctionComponent<Props> = ({ children }) => {
 
     useEffect(() => {
         async function initWeb3() {
-            const provider = new ethers.providers.Web3Provider(window.ethereum as any);
-            const contract = await loadContract("PcMarket", provider);
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+                const contract = await loadContract("PcMarket", provider);
 
-            setWeb3Api(createWeb3State({
-                ethereum: window.ethereum,
-                provider,
-                contract,
-                isLoading: false
-            }))
+                setWeb3Api(createWeb3State({
+                    ethereum: window.ethereum,
+                    provider,
+                    contract,
+                    isLoading: false
+                }))
+            } catch (e: any) {  // when metamask isnt installed
+                console.error(e.message);
+                setWeb3Api((api) => createWeb3State({
+                    ...api as any,
+                    isLoading: false,
+                }))
+            }
         }
 
         initWeb3();
