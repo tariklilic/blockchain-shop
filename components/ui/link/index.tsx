@@ -8,13 +8,13 @@ type LinkProps = {
     activeClass: string
 }
 
-const ActiveLink: FunctionComponent<LinkProps> = ({ children, ...props }) => {
+const ActiveLink: FunctionComponent<LinkProps> = ({ children, activeClass = "", ...props }) => {
     const { pathname } = useRouter()
     let className = children!.props.className || ""
     let _defaultClass = `${className} text-gray-100`
 
     if (pathname === props.href) {
-        className = `${className} text-indigo-400 ${props.activeClass}`
+        className = `${className} text-indigo-400 ${activeClass}`
     } else {
         className = _defaultClass;
     }

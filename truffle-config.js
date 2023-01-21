@@ -1,3 +1,5 @@
+
+
 module.exports = {
   contracts_build_directory: "./public/contracts",
   networks: {
@@ -7,7 +9,6 @@ module.exports = {
       network_id: "*",
     },
   },
-
   compilers: {
     solc: {
       version: "0.8.17"

@@ -16,7 +16,7 @@ const Web3Provider: FunctionComponent<Props> = ({ children }) => {
     useEffect(() => {
         async function initWeb3() {
             const provider = new ethers.providers.Web3Provider(window.ethereum as any);
-            const contract = await loadContract("Components", provider);
+            const contract = await loadContract("PcMarket", provider);
 
             setWeb3Api({
                 ethereum: window.ethereum,
