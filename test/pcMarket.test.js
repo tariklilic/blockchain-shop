@@ -121,5 +121,51 @@ contract("PcMarket", accounts => {
                 assert.equal(ownedPcs[0].tokenId, 2, "Pc has a wrong id");
             })
         })
+
+        //test for transfering pc to new account
+        describe("Token transfer to new owner", () => {
+            before(async () => {
+                await _contract.transferFrom(
+                    accounts[0],
+                    accounts[1],
+                    2
+                )
+            })
+
+            it("accounts[0] should own 0 tokens", async () => {
+                const ownedPcs = await _contract.getOwnedPcs({ from: accounts[0] });
+                assert.equal(ownedPcs.length, 0, "Invalid length of tokens");
+            })
+
+            it("accounts[1] should own 2 tokens", async () => {
+                const ownedPcs = await _contract.getOwnedPcs({ from: accounts[1] });
+                assert.equal(ownedPcs.length, 2, "Invalid length of tokens");
+            })
+        })
+
+        // Test listing nfts
+        describe("List an Pc", () => {
+            before(async () => {
+                await _contract.placePcOnSale(
+                    1,
+                    _pcPrice, { from: accounts[1], value: _listingPrice }
+                )
+            })
+
+            it("should have two listed items", async () => {
+                const listedPcs = await _contract.getAllPcsOnSale();
+
+                assert.equal(listedPcs.length, 2, "Invalid length of Pcs");
+            })
+
+            it("should set new listing price", async () => {
+                await _contract
+                    .setListingPrice(_listingPrice, { from: accounts[0] });
+                const listingPrice = await _contract.listingPrice();
+
+                assert.equal(listingPrice.toString(), _listingPrice, "Invalid Price");
+            })
+
+        })
     })
 })

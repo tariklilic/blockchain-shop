@@ -1,8 +1,9 @@
 pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PcMarket is ERC721URIStorage {
+contract PcMarket is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter; //counter for counting
 
     // Creating new PC Item
@@ -36,6 +37,11 @@ contract PcMarket is ERC721URIStorage {
     );
 
     constructor() ERC721("PcMarket", "CMPT") {}
+
+    function setListingPrice(uint256 newPrice) external onlyOwner {
+        require(newPrice > 0, "Price must be at least 1 wei");
+        listingPrice = newPrice;
+    }
 
     // Get Pc item function
     function getPcItem(uint256 tokenId) public view returns (PcItem memory) {
@@ -149,6 +155,27 @@ contract PcMarket is ERC721URIStorage {
         payable(owner).transfer(msg.value);
     }
 
+    //Add item to sale
+    function placePcOnSale(uint256 tokenId, uint256 newPrice) public payable {
+        // check if you own this item
+        require(
+            ERC721.ownerOf(tokenId) == msg.sender,
+            "You are not owner of this item"
+        );
+
+        // check if the item is on sale
+        require(
+            _idToPcItem[tokenId].isListed == false,
+            "Item is already on sale"
+        );
+        // check if the listing price is correct
+        require(msg.value == listingPrice);
+
+        _idToPcItem[tokenId].isListed = true; // set listing to true
+        _idToPcItem[tokenId].price = newPrice; // set new price
+        _listedItems.increment(); // increment listed items
+    }
+
     // Function to create new PC item
     function _createPcItem(uint256 tokenId, uint256 price) private {
         require(price > 0, "Price must be at least 1 wei"); // Price needs to be above 0 to create item
@@ -169,9 +196,13 @@ contract PcMarket is ERC721URIStorage {
 
         if (from == address(0)) {
             _addTokenToAllTokensEnumeration(tokenId);
+        } else if (from != to) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
         }
 
-        if (to != from) {
+        if (to == address(0)) {
+            _removeTokenFromAllTokensEnumeration(tokenId);
+        } else if (to != from) {
             _addTokenToOwnerEnumeration(to, tokenId);
         }
     }
@@ -187,5 +218,36 @@ contract PcMarket is ERC721URIStorage {
 
         _ownedTokens[to][length] = tokenId; // mapping pointing to address, poiniting to length (owned pcs), mapping to Id of PC
         _idToOwnedIndex[tokenId] = length; //mapping Id of Pc to length of owned pcs
+    }
+
+    //Remove token from owned enums
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId)
+        private
+    {
+        uint256 lastTokenIndex = ERC721.balanceOf(from) - 1; // Get number of tokens that user owns and decrement by 1
+        uint256 tokenIndex = _idToOwnedIndex[tokenId]; // mapping id to owned index
+
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex]; //mapping of account address and the lost token in the array
+
+            _ownedTokens[from][tokenIndex] = lastTokenId; //remmapping token index to last token index
+            _idToOwnedIndex[lastTokenId] = tokenIndex; //remapping last token index to token index
+        }
+
+        delete _idToOwnedIndex[tokenId]; //delete token Id
+        delete _ownedTokens[from][lastTokenIndex]; //remove last token index from adress (decrement it)
+    }
+
+    // function to remove token from all enums (to destroy the token)
+    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+        uint256 lastTokenIndex = _allPcs.length - 1; //get all PCs length and decrement it
+        uint256 tokenIndex = _idToPcIndex[tokenId]; //map id to index
+        uint256 lastTokenId = _allPcs[lastTokenIndex]; //accesing id of the last index in the array _allPcs
+
+        _allPcs[tokenIndex] = lastTokenId; //remapping of tokenIndex with tokenId
+        _idToPcIndex[lastTokenId] = tokenIndex; //remapping of last token id to token index
+
+        delete _idToPcIndex[tokenId]; //remove tokenId
+        _allPcs.pop(); //remove last item from array
     }
 }
