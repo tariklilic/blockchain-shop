@@ -10,6 +10,9 @@ const abi = contract.abi;
 type NETWORK = typeof contract.networks;
 const targetNetwork = process.env.NEXT_PUBLIC_NETWORK_ID as keyof NETWORK;
 export const contractAddress = contract["networks"][targetNetwork]["address"]
+export const pinataApiKey = process.env.PINATA_API_KEY;
+export const pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY;
+
 
 // function to give us functionalities to set session and save it to the cookies
 export function withSession(handler: any) {

@@ -5,14 +5,18 @@ import { useState } from 'react';
 import { BaseLayout } from '@ui'
 import { Switch } from '@headlessui/react'
 import Link from 'next/link'
-import { PcMeta } from '@_types/pc';
+import { PcMeta, PinataRes } from '@_types/pc';
 import { ChangeEvent } from 'react';
 import axios from 'axios';
 import { useWeb3 } from '@providers/web3';
+import { ethers } from 'ethers';
+
+const ALLOWED_FIELDS = ["name", "description", "image", "attributes"];
 
 const PcCreate: NextPage = () => {
-    const { ethereum } = useWeb3();
+    const { ethereum, contract } = useWeb3();
     const [pcURI, setpcURI] = useState("");
+    const [price, setPrice] = useState("");
     const [hasURI, setHasURI] = useState(false);
     const [pcMeta, setPcMeta] = useState<PcMeta>({
         name: "",
@@ -24,6 +28,55 @@ const PcCreate: NextPage = () => {
             { trait_type: "warranty", value: "0" },
         ]
     });
+
+    const getSignedData = async () => {
+        const messageToSign = await axios.get("/api/verify");
+        const accounts = await ethereum?.request({ method: "eth_requestAccounts" }) as string[];
+        const account = accounts[0];
+
+        const signedData = await ethereum?.request({
+            method: "personal_sign",
+            params: [
+                JSON.stringify(messageToSign.data),
+                account,
+                messageToSign.data.id
+            ]
+        })
+
+        return { signedData, account };
+    }
+
+    const handleImage = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) {
+            console.error("Select a file");
+            return;
+        }
+
+        const file = e.target.files[0];
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+
+        try {
+            const { signedData, account } = await getSignedData();
+
+            const res = await axios.post("/api/verify-image", {
+                address: account,
+                signature: signedData,
+                bytes,
+                contentType: file.type,
+                fileName: file.name.replace(/\.[^/.]+$/, "")
+            })
+
+            const data = res.data as PinataRes;
+            setPcMeta({
+                ...pcMeta,
+                image: `${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`
+            })
+        } catch (e: any) {
+            console.error(e.message);
+        }
+
+    }
 
     //handles changes for name and description
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -44,26 +97,49 @@ const PcCreate: NextPage = () => {
         })
     }
 
-    const createPc = async () => {
+    const uploadMetadata = async () => {
         try {
-            const messageToSign = await axios.get("/api/verify");
-            const accounts = await ethereum?.request({ method: "eth_requestAccounts" }) as string[];
-            const account = accounts[0];
+            const { signedData, account } = await getSignedData();
 
-            const signedData = await ethereum?.request({
-                method: "personal_sign",
-                params: [
-                    JSON.stringify(messageToSign.data),
-                    account,
-                    messageToSign.data.id
-                ]
-            })
-
-            await axios.post("/api/verify", {
+            const res = await axios.post("/api/verify", {
                 address: account,
                 signature: signedData,
                 pc: pcMeta
             })
+
+            const data = res.data as PinataRes;
+            setpcURI(`${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`);
+
+
+        } catch (e: any) {
+            console.error(e.message);
+        }
+    }
+
+    const createPc = async () => {
+        try {
+            const pcRes = await axios.get(pcURI, {
+                headers: { "Accept": "text/plain" }
+            });
+            const content = pcRes.data;
+            console.log(content)
+
+            Object.keys(content).forEach(key => {
+                if (!ALLOWED_FIELDS.includes(key)) {
+                    throw new Error("Invalid Json structure");
+                }
+            })
+
+            const tx = await contract?.mintToken(
+                pcURI,
+                ethers.utils.parseEther(price), {
+                value: ethers.utils.parseEther(0.025.toString())
+            }
+            );
+
+            await tx?.wait();
+            alert("Nft was created!");
+
         } catch (e: any) {
             console.error(e.message);
         }
@@ -128,7 +204,7 @@ const PcCreate: NextPage = () => {
                                         <div className='mb-4 p-4'>
                                             <div className="font-bold">Your metadata: </div>
                                             <div>
-                                                <Link href={pcURI}>
+                                                <Link href={pcURI} legacyBehavior>
                                                     <a className="underline text-indigo-600">
                                                         {pcURI}
                                                     </a>
@@ -143,6 +219,8 @@ const PcCreate: NextPage = () => {
                                             </label>
                                             <div className="mt-1 flex rounded-md shadow-sm">
                                                 <input
+                                                    onChange={(e) => setPrice(e.target.value)}
+                                                    value={price}
                                                     type="number"
                                                     name="price"
                                                     id="price"
@@ -154,10 +232,11 @@ const PcCreate: NextPage = () => {
                                     </div>
                                     <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
                                         <button
+                                            onClick={createPc}
                                             type="button"
                                             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
-                                            List
+                                            Publish
                                         </button>
                                     </div>
                                 </div>
@@ -214,8 +293,8 @@ const PcCreate: NextPage = () => {
                                             </p>
                                         </div>
                                         {/* Has Image? */}
-                                        {false ?
-                                            <img src="https://eincode.mypinata.cloud/ipfs/QmaQYCrX9Fg2kGijqapTYgpMXV7QPPzMwGrSRfV9TvTsfM/Creature_1.png" alt="" className="h-40" /> :
+                                        {pcMeta.image ?
+                                            <img src={pcMeta.image} alt="" className="h-40" /> :
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700">Photo</label>
                                                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -241,6 +320,7 @@ const PcCreate: NextPage = () => {
                                                             >
                                                                 <span>Upload a file</span>
                                                                 <input
+                                                                    onChange={handleImage}
                                                                     id="file-upload"
                                                                     name="file-upload"
                                                                     type="file"
@@ -249,7 +329,7 @@ const PcCreate: NextPage = () => {
                                                             </label>
                                                             <p className="pl-1">or drag and drop</p>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 1MB</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -277,7 +357,7 @@ const PcCreate: NextPage = () => {
                                     </div>
                                     <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
                                         <button
-                                            onClick={createPc}
+                                            onClick={uploadMetadata}
                                             type="button"
                                             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
