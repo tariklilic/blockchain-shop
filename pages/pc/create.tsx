@@ -5,12 +5,70 @@ import { useState } from 'react';
 import { BaseLayout } from '@ui'
 import { Switch } from '@headlessui/react'
 import Link from 'next/link'
-
-const ATTRIBUTES = ["quality", "grade", "warranty"]
+import { PcMeta } from '@_types/pc';
+import { ChangeEvent } from 'react';
+import axios from 'axios';
+import { useWeb3 } from '@providers/web3';
 
 const PcCreate: NextPage = () => {
+    const { ethereum } = useWeb3();
     const [pcURI, setpcURI] = useState("");
     const [hasURI, setHasURI] = useState(false);
+    const [pcMeta, setPcMeta] = useState<PcMeta>({
+        name: "",
+        description: "",
+        image: "",
+        attributes: [
+            { trait_type: "quality", value: "0" },
+            { trait_type: "grade", value: "0" },
+            { trait_type: "warranty", value: "0" },
+        ]
+    });
+
+    //handles changes for name and description
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setPcMeta({ ...pcMeta, [name]: value });
+    }
+
+    //handles changes for values
+    const handleAttributeChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        //get index of attribute
+        const attributeIdx = pcMeta.attributes.findIndex(attr => attr.trait_type === name);
+
+        pcMeta.attributes[attributeIdx].value = value;
+        setPcMeta({
+            ...pcMeta,
+            attributes: pcMeta.attributes
+        })
+    }
+
+    const createPc = async () => {
+        try {
+            const messageToSign = await axios.get("/api/verify");
+            const accounts = await ethereum?.request({ method: "eth_requestAccounts" }) as string[];
+            const account = accounts[0];
+
+            const signedData = await ethereum?.request({
+                method: "personal_sign",
+                params: [
+                    JSON.stringify(messageToSign.data),
+                    account,
+                    messageToSign.data.id
+                ]
+            })
+
+            await axios.post("/api/verify", {
+                address: account,
+                signature: signedData,
+                pc: pcMeta
+            })
+        } catch (e: any) {
+            console.error(e.message);
+        }
+    }
+
     return (
         <BaseLayout>
             <div>
@@ -38,7 +96,7 @@ const PcCreate: NextPage = () => {
                     <div className="md:grid md:grid-cols-3 md:gap-6">
                         <div className="md:col-span-1">
                             <div className="px-4 sm:px-0">
-                                <h3 className="text-lg font-medium leading-6 text-gray-900">List Component</h3>
+                                <h3 className="text-lg font-medium leading-6 text-gray-900">List Item</h3>
                                 <p className="mt-1 text-sm text-gray-600">
                                     This information will be displayed publicly so be careful what you share.
                                 </p>
@@ -110,9 +168,9 @@ const PcCreate: NextPage = () => {
                     <div className="md:grid md:grid-cols-3 md:gap-6">
                         <div className="md:col-span-1">
                             <div className="px-4 sm:px-0">
-                                <h3 className="text-lg font-medium leading-6 text-gray-900">Create Components Metadata</h3>
+                                <h3 className="text-lg font-medium leading-6 text-gray-900">Create Items Metadata</h3>
                                 <p className="mt-1 text-sm text-gray-600">
-                                    The component will be listed publicly.
+                                    The Item will be listed publicly.
                                 </p>
                             </div>
                         </div>
@@ -122,15 +180,17 @@ const PcCreate: NextPage = () => {
                                     <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
                                         <div>
                                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                                Component Name
+                                                Item Name
                                             </label>
                                             <div className="mt-1 flex rounded-md shadow-sm">
                                                 <input
+                                                    value={pcMeta.name}
+                                                    onChange={handleChange}
                                                     type="text"
                                                     name="name"
                                                     id="name"
                                                     className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
-                                                    placeholder="Component"
+                                                    placeholder="Item"
                                                 />
                                             </div>
                                         </div>
@@ -140,16 +200,17 @@ const PcCreate: NextPage = () => {
                                             </label>
                                             <div className="mt-1">
                                                 <textarea
+                                                    value={pcMeta.description}
+                                                    onChange={handleChange}
                                                     id="description"
                                                     name="description"
                                                     rows={3}
                                                     className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                                                    placeholder="Component description..."
-                                                    defaultValue={''}
+                                                    placeholder="Item description..."
                                                 />
                                             </div>
                                             <p className="mt-2 text-sm text-gray-500">
-                                                Brief description of Component
+                                                Brief description of Item
                                             </p>
                                         </div>
                                         {/* Has Image? */}
@@ -194,15 +255,17 @@ const PcCreate: NextPage = () => {
                                             </div>
                                         }
                                         <div className="grid grid-cols-6 gap-6">
-                                            {ATTRIBUTES.map(attribute =>
-                                                <div key={attribute} className="col-span-6 sm:col-span-6 lg:col-span-2">
-                                                    <label htmlFor={attribute} className="block text-sm font-medium text-gray-700">
-                                                        {attribute}
+                                            {pcMeta.attributes.map(attribute =>
+                                                <div key={attribute.trait_type} className="col-span-6 sm:col-span-6 lg:col-span-2">
+                                                    <label htmlFor={attribute.trait_type} className="block text-sm font-medium text-gray-700">
+                                                        {attribute.trait_type}
                                                     </label>
                                                     <input
+                                                        onChange={handleAttributeChange}
+                                                        value={attribute.value}
                                                         type="text"
-                                                        name={attribute}
-                                                        id={attribute}
+                                                        name={attribute.trait_type}
+                                                        id={attribute.trait_type}
                                                         className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                                                     />
                                                 </div>
@@ -214,10 +277,11 @@ const PcCreate: NextPage = () => {
                                     </div>
                                     <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
                                         <button
+                                            onClick={createPc}
                                             type="button"
                                             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
-                                            Save
+                                            Publish
                                         </button>
                                     </div>
                                 </div>
