@@ -3,11 +3,9 @@
 
 import type { NextPage } from 'next'
 import { BaseLayout, PcList } from '@ui'
-import { useListedPcs } from '@hooks/web3'
-import { Pc } from '@_types/pc';
+
 
 const Home: NextPage = () => {
-  const { pcs } = useListedPcs();
 
   return (
     <BaseLayout>
@@ -22,9 +20,7 @@ const Home: NextPage = () => {
               Best place to buy new and used PC components and tech
             </p>
           </div>
-          <PcList
-            pcs={pcs.data as Pc[]}
-          />
+          <PcList />
         </div>
       </div>
     </BaseLayout>

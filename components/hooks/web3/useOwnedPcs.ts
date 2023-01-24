@@ -2,8 +2,10 @@ import useSWR from "swr"
 import { CryptoHookFactory } from "@_types/hooks"
 import { Pc } from "@_types/pc"
 import { ethers } from "ethers"
+import { useCallback } from "react";
 
 type UseOwnedPcsResponse = {
+    listPc: (tokenId: number, price: number) => Promise<void>;
 }
 
 type OwnedPcsHookFactory = CryptoHookFactory<any, UseOwnedPcsResponse>
@@ -37,10 +39,33 @@ export const hookFactory: OwnedPcsHookFactory = ({ contract }) => () => {
         }
     )
 
+    // line for reacts use callback
+    const _contract = contract;
+
+    //function to sell component
+    const listPc = useCallback(async (tokenId: number, price: number) => {
+        try {
+            const result = await _contract!.placePcOnSale(
+                tokenId,
+                ethers.utils.parseEther(price.toString()),
+                {
+                    value: ethers.utils.parseEther(0.025.toString())
+                }
+            )
+
+            await result?.wait();
+
+            alert("Item has been listed");
+        } catch (e: any) {
+            console.log(e.message);
+        }
+    }, [_contract])
+
 
 
     return {
         ...swr,
+        listPc,
         data: data || [],
     };
 }

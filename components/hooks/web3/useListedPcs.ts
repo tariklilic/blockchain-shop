@@ -2,8 +2,10 @@ import useSWR from "swr"
 import { CryptoHookFactory } from "@_types/hooks"
 import { Pc } from "@_types/pc"
 import { ethers } from "ethers"
+import { useCallback } from "react";
 
 type UseListedPcsResponse = {
+    buyPc: (token: number, value: number) => Promise<void>;
 }
 
 type ListedPcsHookFactory = CryptoHookFactory<any, UseListedPcsResponse>
@@ -37,10 +39,31 @@ export const hookFactory: ListedPcsHookFactory = ({ contract }) => () => {
         }
     )
 
+    // line for reacts use callback
+    const _contract = contract;
+
+    //line to buy component 
+    const buyPc = useCallback(async (tokenId: number, value: number) => {
+        try {
+            const result = await _contract!.buyPc(
+                tokenId, {
+                value: ethers.utils.parseEther(value.toString())
+            }
+            )
+
+            await result?.wait();
+
+            alert("Item successfully bought");
+        } catch (e: any) {
+            console.log(e.message);
+        }
+    }, [_contract])
+
 
 
     return {
         ...swr,
+        buyPc,
         data: data || [],
     };
 }
