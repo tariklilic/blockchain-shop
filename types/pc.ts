@@ -9,3 +9,14 @@ export type PcMeta = {
     image: string;
     attributes: PcAttribute[];
 }
+
+export type PcCore = {
+    tokenId: number;
+    price: number;
+    creator: string;
+    isListed: boolean;
+}
+
+export type Pc = {
+    meta: PcMeta
+} & PcCore

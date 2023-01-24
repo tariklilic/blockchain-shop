@@ -1,0 +1,19 @@
+{
+    "description": "Mechanical keyboard, good for gaming",
+    "image": "https://gateway.pinata.cloud/ipfs/QmVq8BNFNJVabwHf4E3xtKDGSMfUPPwUgw84cgjoVLh8Lv",
+    "name": "Razer Deathstalker V2",
+    "attributes": [
+        {
+            "trait_type": "quality",
+            "value": "90"
+        },
+        {
+            "trait_type": "grade",
+            "value": "80"
+        },
+        {
+            "trait_type": "warranty",
+            "value": "12"
+        }
+    ]
+}

@@ -1,10 +1,11 @@
 import { MetaMaskInpageProvider } from "@metamask/providers"
 import { Contract, providers } from "ethers"
 import { SWRResponse } from 'swr'
+import { PcMarketContract } from "./pcMarketContract";
 
 export type Web3Dependencies = {
     provider: providers.Web3Provider,
-    contract: Contract,
+    contract: PcMarketContract,
     ethereum: MetaMaskInpageProvider,
     isLoading: boolean;
 }

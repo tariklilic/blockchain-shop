@@ -1,0 +1,19 @@
+{
+    "description": "A very good and high quality mouse.",
+    "image": "https://gateway.pinata.cloud/ipfs/QmU548VNrYiLLPiEPf1gvfqPBq7rZUw4XbXu3FJzAZBKtg",
+    "name": "Logitech G502",
+    "attributes": [
+        {
+            "trait_type": "quality",
+            "value": "95"
+        },
+        {
+            "trait_type": "grade",
+            "value": "100"
+        },
+        {
+            "trait_type": "warranty",
+            "value": "24"
+        }
+    ]
+}

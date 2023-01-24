@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'react';
-import { PcMeta } from '../../../../types/pc';
+import { Pc, PcMeta } from '../../../../types/pc';
 
 type PcItemProps = {
-    item: PcMeta;
+    item: Pc;
 }
 
 const PcItem: FunctionComponent<PcItemProps> = ({ item }) => {
@@ -11,7 +11,7 @@ const PcItem: FunctionComponent<PcItemProps> = ({ item }) => {
             <div className="flex-shrink-0">
                 <img
                     className={`h-full w-full object-cover`}
-                    src={item.image}
+                    src={item.meta.image}
                     alt="New NFT"
                 />
             </div>
@@ -21,8 +21,8 @@ const PcItem: FunctionComponent<PcItemProps> = ({ item }) => {
                         Components
                     </p>
                     <div className="block mt-2">
-                        <p className="text-xl font-semibold text-gray-900">{item.name}</p>
-                        <p className="mt-3 mb-3 text-base text-gray-500">{item.description}</p>
+                        <p className="text-xl font-semibold text-gray-900">{item.meta.name}</p>
+                        <p className="mt-3 mb-3 text-base text-gray-500">{item.meta.description}</p>
                     </div>
                 </div>
                 <div className="overflow-hidden mb-4">
@@ -31,12 +31,12 @@ const PcItem: FunctionComponent<PcItemProps> = ({ item }) => {
                             <dt className="order-2 text-sm font-medium text-gray-500">Price</dt>
                             <dd className="order-1 text-xl font-extrabold text-indigo-600">
                                 <div className="flex justify-center items-center">
-                                    100
+                                    {item.price}
                                     <img className="h-6" src="/images/small-eth.webp" alt="eth icon" />
                                 </div>
                             </dd>
                         </div>
-                        {item.attributes.map(attribute =>
+                        {item.meta.attributes.map(attribute =>
                             <div key={attribute.trait_type} className="flex flex-col px-4 pt-4">
                                 <dt className="order-2 text-sm font-medium text-gray-500">{attribute.trait_type}</dt>
                                 <dd className="order-1 text-xl font-extrabold text-indigo-600">{attribute.value}</dd>

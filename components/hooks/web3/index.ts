@@ -15,3 +15,19 @@ export const useNetwork = () => {
         network: swrRes
     }
 }
+
+export const useListedPcs = () => {
+    const hooks = useHooks();
+    const swrRes = hooks.useListedPcs();
+    return {
+        pcs: swrRes
+    }
+}
+
+export const useOwnedPcs = () => {
+    const hooks = useHooks();
+    const swrRes = hooks.useOwnedPcs();
+    return {
+        pcs: swrRes
+    }
+}

@@ -3,12 +3,11 @@
 
 import type { NextPage } from 'next'
 import { BaseLayout, PcList } from '@ui'
-import PcParts from "../content/meta.json"
-import { PcMeta } from '@_types/pc'
-import { useWeb3 } from '@providers/web3'
+import { useListedPcs } from '@hooks/web3'
+import { Pc } from '@_types/pc';
 
 const Home: NextPage = () => {
-  const { provider, contract } = useWeb3();
+  const { pcs } = useListedPcs();
 
   return (
     <BaseLayout>
@@ -24,7 +23,7 @@ const Home: NextPage = () => {
             </p>
           </div>
           <PcList
-            PcParts={PcParts as PcMeta[]}
+            pcs={pcs.data as Pc[]}
           />
         </div>
       </div>
