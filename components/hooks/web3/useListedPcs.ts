@@ -3,6 +3,7 @@ import { CryptoHookFactory } from "@_types/hooks"
 import { Pc } from "@_types/pc"
 import { ethers } from "ethers"
 import { useCallback } from "react";
+import { toast } from "react-toastify";
 
 type UseListedPcsResponse = {
     buyPc: (token: number, value: number) => Promise<void>;
@@ -51,9 +52,11 @@ export const hookFactory: ListedPcsHookFactory = ({ contract }) => () => {
             }
             )
 
-            await result?.wait();
-
-            alert("Item successfully bought");
+            await toast.promise(result!.wait(), {
+                pending: "Processing transaction",
+                success: "Component bought, check your profile",
+                error: "Processing error"
+            })
         } catch (e: any) {
             console.log(e.message);
         }

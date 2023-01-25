@@ -10,11 +10,16 @@ import { ChangeEvent } from 'react';
 import axios from 'axios';
 import { useWeb3 } from '@providers/web3';
 import { ethers } from 'ethers';
+import { toast } from 'react-toastify';
+import { useNetwork } from '@hooks/web3';
+import { ExclamationIcon } from '@heroicons/react/solid';
+
 
 const ALLOWED_FIELDS = ["name", "description", "image", "attributes"];
 
 const PcCreate: NextPage = () => {
     const { ethereum, contract } = useWeb3();
+    const { network } = useNetwork();
     const [pcURI, setpcURI] = useState("");
     const [price, setPrice] = useState("");
     const [hasURI, setHasURI] = useState(false);
@@ -59,12 +64,18 @@ const PcCreate: NextPage = () => {
         try {
             const { signedData, account } = await getSignedData();
 
-            const res = await axios.post("/api/verify-image", {
+            const promise = axios.post("/api/verify-image", {
                 address: account,
                 signature: signedData,
                 bytes,
                 contentType: file.type,
                 fileName: file.name.replace(/\.[^/.]+$/, "")
+            })
+
+            const res = await toast.promise(promise, {
+                pending: "Uploading image",
+                success: "Image uploaded",
+                error: "Image upload error"
             })
 
             const data = res.data as PinataRes;
@@ -101,10 +112,16 @@ const PcCreate: NextPage = () => {
         try {
             const { signedData, account } = await getSignedData();
 
-            const res = await axios.post("/api/verify", {
+            const promise = axios.post("/api/verify", {
                 address: account,
                 signature: signedData,
                 pc: pcMeta
+            })
+
+            const res = await toast.promise(promise, {
+                pending: "Uploading component",
+                success: "Component uploaded",
+                error: "Component upload error"
             })
 
             const data = res.data as PinataRes;
@@ -137,12 +154,39 @@ const PcCreate: NextPage = () => {
             }
             );
 
-            await tx?.wait();
-            alert("Nft was created!");
-
+            await toast.promise(tx!.wait(), {
+                pending: "Uploading component",
+                success: "Component uploaded",
+                error: "Component upload error"
+            })
         } catch (e: any) {
             console.error(e.message);
         }
+    }
+
+    if (!network.isConnectedToNetwork) {
+        return (
+            <BaseLayout>
+                <div className="rounded-md bg-yellow-50 p-4 mt-10">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <ExclamationIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium text-yellow-800">Wrong Connection</h3>
+                            <div className="mt-2 text-sm text-yellow-700">
+                                <p>
+                                    {network.isLoading ?
+                                        "Loading..." :
+                                        `Connect to ${network.targetNetwork}`
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </BaseLayout>
+        )
     }
 
     return (
@@ -155,7 +199,7 @@ const PcCreate: NextPage = () => {
                             <Switch
                                 checked={hasURI}
                                 onChange={() => setHasURI(!hasURI)}
-                                className={`${hasURI ? 'bg-indigo-900' : 'bg-indigo-700'}
+                                className={`${hasURI ? 'bg-blue-900' : 'bg-blue-700'}
                   relative inline-flex flex-shrink-0 h-[28px] w-[64px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
                             >
                                 <span className="sr-only">Use setting</span>
@@ -193,7 +237,7 @@ const PcCreate: NextPage = () => {
                                                         type="text"
                                                         name="uri"
                                                         id="uri"
-                                                        className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+                                                        className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
                                                         placeholder="http://link.com/data.json"
                                                     />
                                                 </div>
@@ -205,7 +249,7 @@ const PcCreate: NextPage = () => {
                                             <div className="font-bold">Your metadata: </div>
                                             <div>
                                                 <Link href={pcURI} legacyBehavior>
-                                                    <a className="underline text-indigo-600">
+                                                    <a className="underline text-blue-600">
                                                         {pcURI}
                                                     </a>
                                                 </Link>
@@ -224,7 +268,7 @@ const PcCreate: NextPage = () => {
                                                     type="number"
                                                     name="price"
                                                     id="price"
-                                                    className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+                                                    className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
                                                     placeholder="0.8"
                                                 />
                                             </div>
@@ -234,7 +278,7 @@ const PcCreate: NextPage = () => {
                                         <button
                                             onClick={createPc}
                                             type="button"
-                                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             Publish
                                         </button>
@@ -268,7 +312,7 @@ const PcCreate: NextPage = () => {
                                                     type="text"
                                                     name="name"
                                                     id="name"
-                                                    className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+                                                    className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
                                                     placeholder="Item"
                                                 />
                                             </div>
@@ -284,7 +328,7 @@ const PcCreate: NextPage = () => {
                                                     id="description"
                                                     name="description"
                                                     rows={3}
-                                                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
                                                     placeholder="Item description..."
                                                 />
                                             </div>
@@ -316,7 +360,7 @@ const PcCreate: NextPage = () => {
                                                         <div className="flex text-sm text-gray-600">
                                                             <label
                                                                 htmlFor="file-upload"
-                                                                className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                                                                className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                                                             >
                                                                 <span>Upload a file</span>
                                                                 <input
@@ -327,9 +371,7 @@ const PcCreate: NextPage = () => {
                                                                     className="sr-only"
                                                                 />
                                                             </label>
-                                                            <p className="pl-1">or drag and drop</p>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 1MB</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -346,7 +388,7 @@ const PcCreate: NextPage = () => {
                                                         type="text"
                                                         name={attribute.trait_type}
                                                         id={attribute.trait_type}
-                                                        className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                                        className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                                                     />
                                                 </div>
                                             )}
@@ -359,7 +401,7 @@ const PcCreate: NextPage = () => {
                                         <button
                                             onClick={uploadMetadata}
                                             type="button"
-                                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             Publish
                                         </button>

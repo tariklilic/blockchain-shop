@@ -14,7 +14,7 @@ const ActiveLink: FunctionComponent<LinkProps> = ({ children, activeClass = "", 
     let _defaultClass = `${className} text-gray-100`
 
     if (pathname === props.href) {
-        className = `${className} text-indigo-400 ${activeClass}`
+        className = `${className} text-blue-400 ${activeClass}`
     } else {
         className = _defaultClass;
     }
